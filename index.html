@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>Dark Visa — Encrypted Visa Cards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Same as original styles, keep unchanged */
+        :root {
+            --primary: #000000;
+            --secondary: #00ff00;
+            --accent: #ff0000;
+            --text: #ffffff;
+            --bg-dark: #0a0a0a;
+            --bg-light: #121212;
+            --bg-surface: rgba(18, 18, 18, 0.75);
+            --border: rgba(0, 255, 0, 0.2);
+            --border-glow: rgba(0, 255, 0, 0.5);
+            --blue: #0066ff;
+            --purple: #9900ff;
+            --yellow: #ffcc00;
+            --success: #00ff95;
+            --warning: #ffcc00;
+            --error: #ff4d6d;
+            --shadow-sm: 0 4px 12px rgba(0,0,0,.5);
+            --shadow-md: 0 8px 24px rgba(0,0,0,.6);
+            --shadow-glow: 0 0 25px rgba(0, 255, 0, 0.4);
+            --radius-sm: 10px;
+            --radius: 16px;
+            --radius-lg: 24px;
+            --ease: cubic-bezier(0.2, 0.9, 0.3, 1.2);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            font-family: 'Roboto Mono', monospace;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+        
+        /* Animated Background */
+        .bg-layer { position: fixed; inset: 0; pointer-events: none; z-index: -2; }
+        .bg-space { background: radial-gradient(ellipse at 30% 40%, #0a0a0a, #000000); z-index: -5; }
+        .grid-lines {
+            z-index: -3;
+            background-image: 
+                linear-gradient(rgba(0, 255, 0, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.08) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.4;
+            animation: gridMove 30s linear infinite;
+        }
+        @keyframes gridMove { from { background-position: 0 0; } to { background-position: 40px 40px; } }
+        .aurora {
+            z-index: -2;
+            background: radial-gradient(circle at 20% 30%, rgba(0, 255, 0, 0.15), transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(255, 0, 0, 0.1), transparent 50%);
+            filter: blur(40px);
+            animation: auroraShift 18s infinite alternate;
+        }
+        @keyframes auroraShift { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.2); opacity: 0.9; } }
+        .particles { z-index: -1; overflow: hidden; }
+        .particle {
+            position: absolute; width: 3px; height: 3px; border-radius: 50%;
+            background: #00ff00; box-shadow: 0 0 8px #00ff00;
+            opacity: 0.5; animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.8; transform: translateY(90vh) scale(1); }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-10vh) scale(0.5); opacity: 0; }
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
+        header {
+            background-color: rgba(0,0,0,0.85);
+            border-bottom: 1px solid var(--secondary);
+            padding: 30px 0;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            position: relative;
+            z-index: 10;
+        }
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            color: var(--accent);
+            text-shadow: 0 0 15px var(--accent);
+            animation: glow-red 2s infinite alternate;
+        }
+        .tagline { color: var(--secondary); font-size: 1.1rem; letter-spacing: 2px; }
+        @keyframes glow-red {
+            from { text-shadow: 0 0 5px var(--accent); }
+            to { text-shadow: 0 0 20px var(--accent), 0 0 30px var(--accent); }
+        }
+        
+        /* Language Switcher */
+        .lang-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--secondary);
+            border-radius: 30px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--secondary);
+            transition: 0.2s;
+            z-index: 20;
+        }
+        .lang-switch:hover {
+            background: var(--secondary);
+            color: black;
+            box-shadow: 0 0 10px var(--secondary);
+        }
+        [dir="rtl"] .lang-switch { right: auto; left: 20px; }
+        
+        .products { padding: 50px 0; }
+        .logo-container { text-align: center; margin-bottom: 30px; }
+        .animated-logo {
+            width: 160px; height: 160px; margin: 0 auto;
+            animation: float 4s ease-in-out infinite, glow-pulse 3s infinite alternate;
+        }
+        .animated-logo img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 15px #00ff00); }
+        @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0); } }
+        @keyframes glow-pulse { 0% { filter: drop-shadow(0 0 10px #00ff00); } 100% { filter: drop-shadow(0 0 25px #00ff00); } }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--secondary);
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--secondary), var(--accent), transparent);
+            margin: 15px auto 0;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .product-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.4s var(--ease);
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-glow);
+            border-color: var(--secondary);
+        }
+        .product-image {
+            height: 180px;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-image img { max-width: 85%; max-height: 85%; transition: transform 0.3s; }
+        .product-card:hover .product-image img { transform: scale(1.05); }
+        .product-info { padding: 20px; }
+        .product-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+        .product-price { font-size: 1.3rem; font-weight: bold; margin-bottom: 12px; color: var(--yellow); }
+        .product-expiry { font-size: 0.85rem; color: #aaa; margin-bottom: 8px; }
+        .features-list { list-style: none; margin: 15px 0; }
+        .features-list li { margin-bottom: 6px; padding-right: 18px; position: relative; font-size: 0.85rem; }
+        .features-list li:before { content: "▸"; position: absolute; right: 0; color: var(--secondary); }
+        [dir="ltr"] .features-list li { padding-left: 18px; padding-right: 0; }
+        [dir="ltr"] .features-list li:before { left: 0; right: auto; }
+        .feature-green { color: var(--success); }
+        .feature-red { color: var(--accent); }
+        .feature-blue { color: var(--blue); }
+        .feature-purple { color: var(--purple); }
+        .feature-yellow { color: var(--yellow); }
+        
+        .btn {
+            display: block;
+            background: linear-gradient(135deg, var(--secondary), #00aa00);
+            color: #000;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            width: 100%;
+        }
+        .btn:hover {
+            background: var(--accent);
+            box-shadow: 0 0 20px var(--accent);
+            color: white;
+            transform: scale(1.02);
+        }
+        
+        /* Payment Modal (unchanged) */
+        .payment-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .payment-content {
+            background: linear-gradient(145deg, #0c0c0c, #050505);
+            border: 1px solid var(--secondary);
+            border-radius: var(--radius-lg);
+            max-width: 520px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px 24px;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(0,255,0,0.3);
+            animation: modalIn 0.4s var(--ease);
+        }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(30px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .close-modal {
+            position: absolute; top: 16px; left: 20px;
+            font-size: 28px; cursor: pointer; color: var(--text);
+            transition: all 0.2s; background: rgba(255,0,0,0.2); width: 34px; height: 34px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        }
+        .close-modal:hover { background: var(--accent); color: white; transform: rotate(90deg); }
+        .payment-title { font-family: 'Orbitron', sans-serif; color: var(--secondary); text-align: center; margin-bottom: 20px; font-size: 1.6rem; }
+        .payment-amount { display: flex; justify-content: space-between; padding-bottom: 15px; border-bottom: 1px dashed #333; margin-bottom: 20px; font-size: 1.2rem; }
+        .network-info { text-align: center; color: var(--secondary); margin: 15px 0; font-family: 'Orbitron'; }
+        .qr-container { text-align: center; margin: 20px 0; }
+        .qr-code { display: inline-block; background: white; padding: 12px; border-radius: 16px; box-shadow: 0 0 20px rgba(0,255,0,0.3); }
+        .qr-code img { width: 200px; height: 200px; }
+        .wallet-address-container {
+            background: #111; padding: 12px; border-radius: var(--radius-sm);
+            border: 1px solid var(--secondary); display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 20px 0;
+        }
+        .wallet-address { font-family: monospace; word-break: break-all; font-size: 0.8rem; flex: 1; direction: ltr; text-align: left; }
+        .copy-btn {
+            background: var(--secondary); color: black; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer;
+            font-weight: bold; transition: 0.2s;
+        }
+        .copy-btn:hover { background: var(--accent); color: white; }
+        .payment-steps { margin: 20px 0; }
+        .step { margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+        .step-number {
+            display: inline-flex; width: 28px; height: 28px; background: var(--secondary); color: black;
+            border-radius: 50%; align-items: center; justify-content: center; font-weight: bold;
+        }
+        .step-title { font-family: 'Orbitron'; font-size: 0.9rem; }
+        .payment-form { margin-top: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--secondary); }
+        .form-group input {
+            width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333;
+            border-radius: var(--radius-sm); color: white; font-family: monospace;
+        }
+        .verify-btn {
+            background: var(--accent); color: white; border: none; padding: 12px;
+            border-radius: var(--radius-sm); font-family: 'Orbitron'; font-weight: bold;
+            width: 100%; cursor: pointer; transition: 0.2s;
+        }
+        .verify-btn:hover { background: #ff3333; box-shadow: 0 0 15px var(--accent); }
+        
+        .verification-box {
+            background: #0a0a0a; border: 2px solid var(--secondary); border-radius: 20px;
+            padding: 25px 20px; text-align: center; margin: 20px 0; display: none;
+            animation: fadeInUp 0.4s;
+        }
+        .lock-icon { font-size: 48px; color: var(--secondary); margin-bottom: 15px; animation: softPulse 1.5s infinite; }
+        @keyframes softPulse { 0%,100%{opacity:0.7;transform:scale(1)} 50%{opacity:1;transform:scale(1.08)} }
+        .verification-title { font-family: 'Orbitron'; color: var(--secondary); font-size: 1.2rem; margin-bottom: 10px; }
+        .timer-bar { width: 100%; height: 6px; background: #222; border-radius: 10px; overflow: hidden; margin: 15px 0 8px; }
+        .timer-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--secondary), var(--accent)); animation: shrinkWidth 30s linear forwards; }
+        @keyframes shrinkWidth { from { width: 100%; } to { width: 0%; } }
+        .timer-text { font-family: 'Orbitron'; color: var(--secondary); font-size: 1rem; }
+        
+        .error-box {
+            background: rgba(255,0,0,0.1); border: 1px solid var(--accent); border-radius: 16px;
+            padding: 20px; text-align: center; margin: 20px 0; display: none;
+            animation: fadeInUp 0.4s;
+        }
+        .error-box .retry-btn {
+            background: var(--accent); color: white; border: none; padding: 10px 20px;
+            border-radius: 30px; font-family: 'Orbitron'; font-weight: bold; margin-top: 15px;
+            cursor: pointer; transition: 0.2s;
+        }
+        .error-box .retry-btn:hover { background: #ff3333; transform: scale(1.02); }
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Smart Cat Assistant */
+        .cat-fab {
+            position: fixed; bottom: 24px; left: 24px; z-index: 9000;
+            width: 68px; height: 68px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #1a3a1a, #051005);
+            border: 2px solid #00ff00;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6), 0 0 25px #00ff00;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .cat-fab:active { transform: scale(0.94); }
+        .cat-fab svg { width: 54px; height: 54px; filter: drop-shadow(0 0 6px #00ff00); }
+        .cat-bubble {
+            position: fixed; bottom: 100px; left: 24px; z-index: 9001;
+            background: linear-gradient(135deg, #111, #050505);
+            border: 1px solid #00ff00;
+            border-radius: 18px; padding: 10px 16px; max-width: 260px;
+            font-size: 0.85rem; font-weight: bold; color: #fff;
+            opacity: 0; transform: translateY(10px) scale(0.9);
+            transition: all 0.25s cubic-bezier(0.2,0.9,0.4,1.2);
+            pointer-events: none; display: flex; gap: 8px; backdrop-filter: blur(8px);
+        }
+        .cat-bubble.show { opacity: 1; transform: translateY(0) scale(1); }
+        
+        footer {
+            background: #0a0a0a; padding: 25px 0; text-align: center;
+            border-top: 1px solid rgba(0,255,0,0.2); margin-top: 40px;
+        }
+        .telegram-float { position: fixed; bottom: 24px; right: 24px; z-index: 100; }
+        .telegram-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 55px; height: 55px; background: #0088cc; border-radius: 50%;
+            color: white; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            transition: 0.2s; text-decoration: none;
+        }
+        .telegram-btn:hover { transform: scale(1.08); background: #0077b5; }
+        .telegram-popup {
+            display: none; position: fixed; bottom: 90px; right: 24px;
+            background: #1a1a1a; border: 1px solid #00ff00; border-radius: 12px;
+            padding: 15px; width: 250px; z-index: 101;
+        }
+        .telegram-popup.show { display: block; animation: fadeInUp 0.3s; }
+        .telegram-popup .close-popup { float: left; cursor: pointer; color: #aaa; }
+        .telegram-popup h3 { color: #00ff00; margin: 0 0 10px; }
+        .telegram-link { display: block; background: #0088cc; color: white; padding: 8px; border-radius: 8px; text-align: center; text-decoration: none; margin-top: 10px; }
+        
+        @media (max-width: 600px) {
+            .product-grid { gap: 20px; }
+            .payment-content { padding: 20px; }
+            .qr-code img { width: 160px; height: 160px; }
+            .cat-fab { width: 56px; height: 56px; bottom: 16px; left: 16px; }
+            .telegram-float { bottom: 16px; right: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-layer bg-space"></div>
+<div class="bg-layer grid-lines"></div>
+<div class="bg-layer aurora"></div>
+<div class="bg-layer particles" id="particles"></div>
+
+<header>
+    <div class="container">
+        <div class="logo">DARK VISA</div>
+        <div class="tagline" id="tagline">Encrypted Visa Cards • Dark Web</div>
+        <div class="lang-switch" id="langSwitch">🇬🇧 English / 🇸🇦 العربية</div>
+    </div>
+</header>
+
+<section class="products">
+    <div class="container">
+        <div class="logo-container">
+            <div class="animated-logo">
+                <img src="https://i.postimg.cc/V6K1bxJm/Picsart-25-08-01-18-15-30-026.png" alt="Dark Visa Logo">
+            </div>
+        </div>
+        <h2 class="section-title" id="sectionTitle">Choose Your Card</h2>
+        <div class="product-grid" id="productGrid"></div>
+    </div>
+</section>
+
+<!-- Payment Modal (same structure but texts will be dynamically translated) -->
+<div id="paymentModal" class="payment-modal">
+    <div class="payment-content">
+        <span class="close-modal">&times;</span>
+        <h2 class="payment-title" id="modalTitle">Complete Payment</h2>
+        <div class="payment-amount"><span id="amountLabel">Amount:</span><span id="paymentAmount">0 USDT</span></div>
+        <div class="network-info"><i class="fas fa-network-wired"></i> <span id="networkLabel">TRC20 Network</span></div>
+        <div class="qr-container">
+            <div class="qr-code"><img id="paymentQr" src="" alt="QR"></div>
+        </div>
+        <div class="wallet-address-container">
+            <div class="wallet-address" id="walletAddress">TEXsTYzS9Ld2DbKozscjL3RoEs2wRLPicH</div>
+            <button class="copy-btn" id="copyBtn"><i class="fas fa-copy"></i> <span id="copyText">Copy</span></button>
+        </div>
+        <div class="payment-steps">
+            <div class="step"><span class="step-number">1</span><span class="step-title" id="step1">Transfer the required amount</span></div>
+            <div class="step"><span class="step-number">2</span><span class="step-title" id="step2">Copy TXID</span></div>
+            <div class="step"><span class="step-number">3</span><span class="step-title" id="step3">Enter TXID to verify</span></div>
+        </div>
+        <div class="payment-form" id="paymentForm">
+            <div class="form-group"><label id="txidLabel">Transaction ID (TXID)</label><input type="text" id="transactionId" placeholder="Enter any transaction ID"></div>
+            <button class="verify-btn" id="verifyBtn"><span id="verifyText">Verify Payment</span></button>
+        </div>
+        <div class="verification-box" id="verificationBox">
+            <div class="lock-icon"><i class="fas fa-lock"></i></div>
+            <div class="verification-title" id="verifTitle">Verifying transaction</div>
+            <div class="verification-message" id="verifMsg">Card details will appear here</div>
+            <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+            <div class="timer-text" id="timerText">00:30</div>
+        </div>
+        <div class="error-box" id="errorBox">
+            <div class="error-icon"><i class="fas fa-times-circle"></i></div>
+            <div class="error-title" id="errorTitle">Verification Failed</div>
+            <div class="error-message" id="errorMsg">We could not confirm the transaction. Please make sure you completed the payment correctly and try again.</div>
+            <button class="retry-btn" id="retryBtn"><span id="retryText">Retry</span></button>
+        </div>
+    </div>
+</div>
+
+<!-- Smart Cat Assistant -->
+<div class="cat-fab" id="catFab">
+    <svg viewBox="0 0 200 200">
+        <ellipse cx="100" cy="115" rx="68" ry="60" fill="#fff" stroke="#00ff00" stroke-width="3"/>
+        <circle cx="50" cy="128" r="9" fill="#ffb3e6"/>
+        <circle cx="150" cy="128" r="9" fill="#ffb3e6"/>
+        <ellipse cx="74" cy="108" rx="11" ry="13" fill="#1a0533"/>
+        <ellipse cx="126" cy="108" rx="11" ry="13" fill="#1a0533"/>
+        <circle cx="77" cy="104" r="4" fill="#00ff99"/>
+        <circle cx="129" cy="104" r="4" fill="#00ff99"/>
+        <path d="M92 130 L108 130 L100 138 Z" fill="#00ff00"/>
+        <path d="M84 148 Q100 162 116 148" stroke="#00ff00" stroke-width="3" fill="none"/>
+    </svg>
+</div>
+<div class="cat-bubble" id="catBubble"><span class="cat-emoji">😺</span><span class="cat-msg" id="catBubbleText"></span></div>
+
+<!-- Telegram Floating Button -->
+<div class="telegram-float">
+    <a href="#" class="telegram-btn" id="telegramBtn"><i class="fab fa-telegram"></i></a>
+    <div class="telegram-popup" id="telegramPopup">
+        <span class="close-popup">&times;</span>
+        <h3 id="telegramTitle">Contact us</h3>
+        <p id="telegramDesc">For technical support:</p>
+        <a href="https://t.me/silk977_bot" class="telegram-link" target="_blank"><i class="fab fa-telegram"></i> <span id="telegramLinkText">Join Channel</span></a>
+    </div>
+</div>
+
+<footer><div class="container"><p id="footerText">Dark Visa © 2026</p></div></footer>
+
+<script>
+    // Product Data (with expiry and tiktok feature)
+    const generateExpiry = () => {
+        let month = Math.floor(Math.random() * 12) + 1;
+        let year = new Date().getFullYear() + Math.floor(Math.random() * 3) + 1;
+        return `${month.toString().padStart(2,'0')}/${year}`;
+    };
+    const productsData = [
+        { id:1, name:{en:"US Visa Card", ar:"بطاقة أمريكية (VISA)"}, price:100, balance:7500, image:"https://i.postimg.cc/cHXkmZ7k/Picsart-25-08-01-16-39-36-850.png", expiry:generateExpiry(), features:{en:["Balance: $7500 (non-reloadable)","Issued in: United States","No OTP","Daily limit: $1500","Compatible with PayPal & Amazon","✅ Supports TikTok Recharge"], ar:["الرصيد: 7500$ (غير قابل للتجديد)","دولة الإصدار: الولايات المتحدة","بدون OTP","الحد اليومي: 1500$","متوافق مع PayPal و Amazon","✅ يدعم شحن تيك توك"]} },
+        { id:2, name:{en:"European MasterCard", ar:"بطاقة أوروبية (MasterCard)"}, price:300, balance:15000, image:"https://i.postimg.cc/cHXkmZ7k/Picsart-25-08-01-16-39-36-850.png", expiry:generateExpiry(), features:{en:["Balance: $15000 (reloadable)","Issued in: Germany","No OTP","Daily limit: $3000","ATM withdrawals","✅ Supports TikTok Recharge"], ar:["الرصيد: 15000$ (قابل للزيادة)","دولة الإصدار: ألمانيا","بدون OTP","الحد اليومي: 3000$","سحب من ATM","✅ يدعم شحن تيك توك"]} },
+        { id:3, name:{en:"British Visa Card", ar:"بطاقة بريطانية (VISA)"}, price:600, balance:30000, image:"https://i.postimg.cc/cHXkmZ7k/Picsart-25-08-01-16-39-36-850.png", expiry:generateExpiry(), features:{en:["Balance: $30000 (reloadable)","Issued in: United Kingdom","No OTP","Daily limit: $6000","Top-up available","✅ Supports TikTok Recharge"], ar:["الرصيد: 30000$ (قابل للزيادة)","دولة الإصدار: المملكة المتحدة","بدون OTP","الحد اليومي: 6000$","إعادة تعبئة","✅ يدعم شحن تيك توك"]} },
+        { id:4, name:{en:"Swiss Visa Black", ar:"بطاقة سويسرية (VISA Black)"}, price:1200, balance:60000, image:"https://i.postimg.cc/cHXkmZ7k/Picsart-25-08-01-16-39-36-850.png", expiry:generateExpiry(), features:{en:["Balance: $60000 (reloadable)","Issued in: Switzerland","No OTP","Daily limit: $12000","Linked bank account","24/7 support","✅ Supports TikTok Recharge"], ar:["الرصيد: 60000$ (قابل للزيادة)","دولة الإصدار: سويسرا","بدون OTP","الحد اليومي: 12000$","حساب بنكي مرتبط","دعم 24/7","✅ يدعم شحن تيك توك"]} }
+    ];
+
+    // Translations
+    let currentLang = 'en'; // default english
+    const translations = {
+        en: {
+            tagline: "Encrypted Visa Cards • Dark Web",
+            sectionTitle: "Choose Your Card",
+            modalTitle: "Complete Payment",
+            amountLabel: "Amount:",
+            networkLabel: "TRC20 Network",
+            copyText: "Copy",
+            step1: "Transfer the required amount",
+            step2: "Copy TXID",
+            step3: "Enter TXID to verify",
+            txidLabel: "Transaction ID (TXID)",
+            verifyText: "Verify Payment",
+            verifTitle: "Verifying transaction",
+            verifMsg: "Card details will appear here",
+            errorTitle: "Verification Failed",
+            errorMsg: "We could not confirm the transaction. Please make sure you completed the payment correctly and try again.",
+            retryText: "Retry",
+            telegramTitle: "Contact us",
+            telegramDesc: "For technical support:",
+            telegramLinkText: "Join Channel",
+            footerText: "Dark Visa © 2026",
+            catMessages: {
+                welcome: "Hello 👋 Choose the card you want and I'll help you!",
+                selectCard: "Great choice! 🚀 Payment window will appear, follow the steps.",
+                copyAddress: "Address copied! 📋 Send the required amount via TRC20.",
+                enterTxid: "Now paste the transaction ID (TXID) and click verify.",
+                verifying: "Verifying transaction 🧠 Please wait 30 seconds...",
+                error: "Sorry, verification failed 😿 Check the transaction and try again."
+            }
+        },
+        ar: {
+            tagline: "بطاقات فيزا مشفرة • Dark Web",
+            sectionTitle: "اختر بطاقتك",
+            modalTitle: "إتمام الدفع",
+            amountLabel: "المبلغ المطلوب:",
+            networkLabel: "شبكة TRC20",
+            copyText: "نسخ",
+            step1: "حول المبلغ المطلوب",
+            step2: "انسخ TXID",
+            step3: "أدخل TXID للتحقق",
+            txidLabel: "رقم المعاملة (TXID)",
+            verifyText: "تحقق من الدفع",
+            verifTitle: "جاري التحقق من المعاملة",
+            verifMsg: "سوف تظهر معلومات البطاقة هنا",
+            errorTitle: "فشل التحقق",
+            errorMsg: "لم نتمكن من تأكيد المعاملة. الرجاء التأكد من إتمام الدفع بشكل صحيح والمحاولة مرة أخرى.",
+            retryText: "إعادة المحاولة",
+            telegramTitle: "تواصل معنا",
+            telegramDesc: "للحصول على الدعم الفني:",
+            telegramLinkText: "انضم للقناة",
+            footerText: "Dark Visa © 2026",
+            catMessages: {
+                welcome: "مرحباً 👋 اختر البطاقة التي تريدها وسأساعدك!",
+                selectCard: "اختيار رائع! 🚀 الآن ستظهر نافذة الدفع، اتبع الخطوات.",
+                copyAddress: "تم نسخ العنوان! 📋 أرسل المبلغ المطلوب عبر TRC20.",
+                enterTxid: "الآن ألصق رقم المعاملة (TXID) واضغط تحقق.",
+                verifying: "جاري التحقق من المعاملة 🧠 انتظر 30 ثانية...",
+                error: "عذراً، فشل التحقق 😿 تأكد من صحة المعاملة وحاول مجدداً."
+            }
+        }
+    };
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        const t = translations[lang];
+        document.getElementById('tagline').innerText = t.tagline;
+        document.getElementById('sectionTitle').innerText = t.sectionTitle;
+        document.getElementById('modalTitle').innerText = t.modalTitle;
+        document.getElementById('amountLabel').innerText = t.amountLabel;
+        document.getElementById('networkLabel').innerText = t.networkLabel;
+        document.getElementById('copyText').innerText = t.copyText;
+        document.getElementById('step1').innerText = t.step1;
+        document.getElementById('step2').innerText = t.step2;
+        document.getElementById('step3').innerText = t.step3;
+        document.getElementById('txidLabel').innerText = t.txidLabel;
+        document.getElementById('verifyText').innerText = t.verifyText;
+        document.getElementById('verifTitle').innerText = t.verifTitle;
+        document.getElementById('verifMsg').innerText = t.verifMsg;
+        document.getElementById('errorTitle').innerText = t.errorTitle;
+        document.getElementById('errorMsg').innerText = t.errorMsg;
+        document.getElementById('retryText').innerText = t.retryText;
+        document.getElementById('telegramTitle').innerText = t.telegramTitle;
+        document.getElementById('telegramDesc').innerText = t.telegramDesc;
+        document.getElementById('telegramLinkText').innerText = t.telegramLinkText;
+        document.getElementById('footerText').innerText = t.footerText;
+        // Change html direction
+        if (lang === 'ar') {
+            document.documentElement.setAttribute('dir', 'rtl');
+            document.documentElement.setAttribute('lang', 'ar');
+        } else {
+            document.documentElement.setAttribute('dir', 'ltr');
+            document.documentElement.setAttribute('lang', 'en');
+        }
+        // Re-render products with new language
+        renderProducts();
+    }
+
+    function renderProducts() {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = '';
+        productsData.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            const name = p.name[currentLang];
+            const featuresList = p.features[currentLang];
+            const expiryText = currentLang === 'en' ? `Expires: ${p.expiry}` : `تنتهي: ${p.expiry}`;
+            card.innerHTML = `
+                <div class="product-image"><img src="${p.image}" alt="${name}"></div>
+                <div class="product-info">
+                    <h3 class="product-title">${name}</h3>
+                    <div class="product-price">${p.price}$ | ${currentLang === 'en' ? 'Balance' : 'رصيد'} ${p.balance}$</div>
+                    <div class="product-expiry">${expiryText}</div>
+                    <ul class="features-list">
+                        ${featuresList.map(f => `<li><span class="feature-green">${f}</span></li>`).join('')}
+                    </ul>
+                    <button class="btn btn-buy" data-price="${p.price}" data-name="${name}">${currentLang === 'en' ? 'Buy Now' : 'شراء الآن'}</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        document.querySelectorAll('.btn-buy').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const price = btn.getAttribute('data-price');
+                openPaymentModal(price);
+            });
+        });
+    }
+
+    // Cat talk with language
+    function catSay(messageKey) {
+        const text = translations[currentLang].catMessages[messageKey];
+        if (!text) return;
+        const bubble = document.getElementById('catBubble');
+        const txtSpan = document.getElementById('catBubbleText');
+        if (!bubble) return;
+        // optional beep
+        try {
+            let ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if (ctx.state === 'suspended') ctx.resume();
+            let osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(520, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(680, ctx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.45);
+        } catch(e) {}
+        clearTimeout(window.typeTimer);
+        clearTimeout(window.hideTimer);
+        txtSpan.textContent = '';
+        bubble.classList.add('show');
+        let i = 0;
+        function type() {
+            if (i <= text.length) {
+                txtSpan.textContent = text.slice(0, i);
+                i++;
+                window.typeTimer = setTimeout(type, 30);
+            } else {
+                window.hideTimer = setTimeout(() => bubble.classList.remove('show'), 4000);
+            }
+        }
+        type();
+    }
+
+    // Payment modal logic (unchanged but with language for labels)
+    let currentPrice = 0;
+    let countdownInterval = null;
+    const walletStatic = "TEXsTYzS9Ld2DbKozscjL3RoEs2wRLPicH";
+
+    function openPaymentModal(price) {
+        currentPrice = price;
+        document.getElementById('paymentAmount').innerText = price + ' USDT';
+        const qrImg = document.getElementById('paymentQr');
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${walletStatic}&amount=${price}&network=trc20`;
+        document.getElementById('walletAddress').innerText = walletStatic;
+        document.getElementById('paymentModal').style.display = 'flex';
+        document.getElementById('paymentForm').style.display = 'block';
+        document.getElementById('verificationBox').style.display = 'none';
+        document.getElementById('errorBox').style.display = 'none';
+        document.getElementById('transactionId').value = '';
+        if (countdownInterval) clearInterval(countdownInterval);
+        catSay("selectCard");
+    }
+
+    function closeModal() {
+        document.getElementById('paymentModal').style.display = 'none';
+        if (countdownInterval) clearInterval(countdownInterval);
+        document.body.style.overflow = '';
+    }
+
+    function copyAddress() {
+        const addr = document.getElementById('walletAddress').innerText;
+        navigator.clipboard.writeText(addr);
+        const btn = document.querySelector('.copy-btn');
+        const orig = btn.innerHTML;
+        btn.innerHTML = `<i class="fas fa-check"></i> ${currentLang === 'en' ? 'Copied!' : 'تم!'}`;
+        setTimeout(() => btn.innerHTML = `<i class="fas fa-copy"></i> ${translations[currentLang].copyText}`, 1500);
+        catSay("copyAddress");
+    }
+
+    function startVerification() {
+        const txid = document.getElementById('transactionId').value.trim();
+        // any txid accepted
+        catSay("verifying");
+        
+        document.getElementById('paymentForm').style.display = 'none';
+        const verBox = document.getElementById('verificationBox');
+        verBox.style.display = 'block';
+        document.getElementById('errorBox').style.display = 'none';
+        
+        let seconds = 30;
+        const timerText = document.getElementById('timerText');
+        const timerFill = document.getElementById('timerFill');
+        timerFill.style.animation = 'none';
+        timerFill.offsetHeight;
+        timerFill.style.animation = 'shrinkWidth 30s linear forwards';
+        timerText.innerText = `00:${seconds.toString().padStart(2,'0')}`;
+        
+        if (countdownInterval) clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => {
+            seconds--;
+            timerText.innerText = `00:${seconds.toString().padStart(2,'0')}`;
+            if (seconds <= 0) {
+                clearInterval(countdownInterval);
+                verBox.style.display = 'none';
+                document.getElementById('errorBox').style.display = 'block';
+                catSay("error");
+            }
+        }, 1000);
+    }
+
+    function retryVerification() {
+        document.getElementById('errorBox').style.display = 'none';
+        document.getElementById('paymentForm').style.display = 'block';
+        document.getElementById('verificationBox').style.display = 'none';
+        document.getElementById('transactionId').value = '';
+        if (countdownInterval) clearInterval(countdownInterval);
+        catSay("enterTxid");
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set default language to English
+        setLanguage('en');
+        // Particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i=0;i<40;i++) {
+            let p = document.createElement('div');
+            p.className = 'particle';
+            let dur = 8 + Math.random() * 15;
+            let size = 2 + Math.random() * 4;
+            p.style.cssText = `left:${Math.random()*100}%; animation-duration:${dur}s; animation-delay:${Math.random()*10}s; width:${size}px; height:${size}px;`;
+            particlesContainer.appendChild(p);
+        }
+        
+        const modal = document.getElementById('paymentModal');
+        const closeBtn = document.querySelector('.close-modal');
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
+        document.getElementById('copyBtn').addEventListener('click', copyAddress);
+        document.getElementById('verifyBtn').addEventListener('click', startVerification);
+        document.getElementById('retryBtn').addEventListener('click', retryVerification);
+        
+        document.getElementById('catFab').addEventListener('click', () => catSay("welcome"));
+        
+        const telBtn = document.getElementById('telegramBtn');
+        const telPopup = document.getElementById('telegramPopup');
+        const closePopup = document.querySelector('.close-popup');
+        telBtn.addEventListener('click', (e) => { e.preventDefault(); telPopup.classList.toggle('show'); });
+        closePopup.addEventListener('click', () => telPopup.classList.remove('show'));
+        document.addEventListener('click', (e) => {
+            if (!telBtn.contains(e.target) && !telPopup.contains(e.target)) telPopup.classList.remove('show');
+        });
+        
+        // Language switcher
+        const langSwitch = document.getElementById('langSwitch');
+        langSwitch.addEventListener('click', () => {
+            const newLang = currentLang === 'en' ? 'ar' : 'en';
+            setLanguage(newLang);
+            // Re-render product cards again
+            renderProducts();
+            // Also update modal texts if open (but modal not open)
+            if (document.getElementById('paymentModal').style.display === 'flex') {
+                // update modal texts dynamically
+                const t = translations[newLang];
+                document.getElementById('modalTitle').innerText = t.modalTitle;
+                document.getElementById('amountLabel').innerText = t.amountLabel;
+                document.getElementById('networkLabel').innerText = t.networkLabel;
+                document.getElementById('copyText').innerText = t.copyText;
+                document.getElementById('step1').innerText = t.step1;
+                document.getElementById('step2').innerText = t.step2;
+                document.getElementById('step3').innerText = t.step3;
+                document.getElementById('txidLabel').innerText = t.txidLabel;
+                document.getElementById('verifyText').innerText = t.verifyText;
+                document.getElementById('verifTitle').innerText = t.verifTitle;
+                document.getElementById('verifMsg').innerText = t.verifMsg;
+                document.getElementById('errorTitle').innerText = t.errorTitle;
+                document.getElementById('errorMsg').innerText = t.errorMsg;
+                document.getElementById('retryText').innerText = t.retryText;
+                document.getElementById('telegramTitle').innerText = t.telegramTitle;
+                document.getElementById('telegramDesc').innerText = t.telegramDesc;
+                document.getElementById('telegramLinkText').innerText = t.telegramLinkText;
+                document.getElementById('footerText').innerText = t.footerText;
+            }
+        });
+        
+        setTimeout(() => catSay("welcome"), 1500);
+    });
+</script>
+</body>
+</html>  
